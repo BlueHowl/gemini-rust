@@ -33,6 +33,30 @@ Add this to your `Cargo.toml`:
 gemini-rust = "1.5.1"
 ```
 
+### Optional Features
+
+#### TOON Format Support
+
+Enable TOON (Token-Oriented Object Notation) format for sending and receiving structured data:
+
+```toml
+[dependencies]
+gemini-rust = { version = "1.5.1", features = ["toon_wip"] }
+```
+
+TOON is a compact, human-readable format using indentation-based structure (similar to YAML):
+- Simple objects: `key: value` (no braces)
+- Nested objects: Use 2-space indentation
+- Arrays: Header with count, then indented items
+- Tabular arrays: `name[count]{fields}:` for efficient object arrays
+
+With the `toon_wip` feature, you can:
+- Request TOON format output from Gemini using `.using_toon()`
+- Send TOON-formatted data to Gemini using `.with_toon_message()`
+- Parse and serialize data locally with TOON format
+
+See [`toon_format.rs`](examples/toon_format.rs) and [`toon_bidirectional.rs`](examples/toon_bidirectional.rs) for complete examples.
+
 ## 🚀 Quick Start
 
 ### Basic Content Generation

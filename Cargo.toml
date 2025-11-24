@@ -25,6 +25,7 @@ features = [
 [dependencies]
 serde = { version = "^1.0", features = ["derive"] }
 serde_json = "^1.0"
+rtoon = { version = "0.2.1", optional = true }
 url = { version = "^2.4", features = ["serde"] }
 async-trait = "^0.1"
 futures = "^0.3.1"
@@ -41,6 +42,10 @@ tracing = "0.1.41"
 strum = { version = "0.27", features = ["derive"] }
 strum_macros = "0.27"
 schemars = { version = "1.0" }
+
+[features]
+default = []
+toon_wip = ["rtoon"]
 
 [dev-dependencies]
 display-error-chain = "0.2"

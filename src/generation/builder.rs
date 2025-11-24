@@ -61,6 +61,38 @@ impl ContentBuilder {
         self
     }
 
+    /// Adds a user message in TOON format to the conversation history.
+    ///
+    /// This method serializes a Rust value to TOON format and adds it as a user message.
+    /// Useful for sending structured data to the model in TOON format.
+    ///
+    /// # Example
+    /// ```rust,ignore
+    /// #[derive(Serialize)]
+    /// struct UserData {
+    ///     name: String,
+    ///     age: u32,
+    /// }
+    ///
+    /// let data = UserData { name: "Alice".to_string(), age: 30 };
+    /// let response = client
+    ///     .generate_content()
+    ///     .with_toon_message(data)?
+    ///     .execute()
+    ///     .await?;
+    /// ```
+    #[cfg(feature = "toon_wip")]
+    pub fn with_toon_message<T: serde::Serialize>(
+        mut self,
+        value: T,
+    ) -> std::result::Result<Self, Box<dyn std::error::Error>> {
+        use crate::common::format::toon;
+        let toon_str = toon::to_string(&value)?;
+        let message = Message::user(toon_str);
+        self.contents.push(message.content);
+        Ok(self)
+    }
+
     /// Adds a model message to the conversation history.
     pub fn with_model_message(mut self, text: impl Into<String>) -> Self {
         let message = Message::model(text);
@@ -210,6 +242,83 @@ impl ContentBuilder {
             .get_or_insert_with(Default::default)
             .response_mime_type = Some(mime_type.into());
         self
+    }
+
+    /// Configures the request to use TOON format output.
+    ///
+    /// This method adds system instructions to guide the model to output in TOON
+    /// (Token-Oriented Object Notation) format. TOON is a compact, human-readable
+    /// format that uses indentation-based structure similar to YAML.
+    ///
+    /// # TOON Format Syntax
+    /// - Simple objects: `key: value` (no braces)
+    /// - Nested objects: Use indentation (2 spaces)
+    /// - Arrays of primitives: Header with count, then indented items
+    /// - Arrays of objects: Tabular format with header `name[count]{fields}:`
+    /// - Strings: Unquoted (unless containing special characters)
+    ///
+    /// # Example
+    /// ```rust,ignore
+    /// let response = client
+    ///     .generate_content()
+    ///     .using_toon()
+    ///     .with_user_message("Create a user profile")
+    ///     .execute()
+    ///     .await?;
+    /// ```
+    ///
+    /// # Note
+    /// This feature is only available when the `toon_wip` feature is enabled.
+    #[cfg(feature = "toon_wip")]
+    pub fn using_toon(self) -> Self {
+        let toon_instruction = r#"You must respond in TOON (Token-Oriented Object Notation) format only.
+
+TOON format syntax rules:
+- Simple objects use "key: value" format (no braces)
+- Nested objects use 2-space indentation
+- Arrays of primitives: header "name[count]:" then indented items
+- Arrays of objects: tabular format "name[count]{field1,field2}:" then comma-separated rows
+- Strings are unquoted unless they contain special characters
+- No quotes around keys or simple string values
+- Use indentation to show hierarchy (2 spaces per level)
+
+Examples:
+
+Simple object:
+id: 123
+name: Ada
+
+Nested object:
+user:
+  id: 123
+  name: Ada
+  email: ada@example.com
+
+Array of primitives:
+features[3]:
+  heart-rate
+  GPS
+  music
+
+Array of objects (tabular):
+users[2]{id,name,role}:
+  1,Alice,admin
+  2,Bob,user
+
+Mixed structure:
+product:
+  name: SmartWatch X
+  price: 3999
+  features[3]:
+    heart-rate
+    GPS
+    music
+  stock: 120
+
+Respond ONLY with valid TOON format. Do not include markdown code blocks, explanations, or any text outside the TOON structure. Use proper indentation (2 spaces per level)."#;
+
+        self.with_system_instruction(toon_instruction)
+            .with_response_mime_type("text/plain")
     }
 
     /// Sets the response schema for structured output.

@@ -84,6 +84,18 @@ Get your API key from [Google AI Studio](https://aistudio.google.com/apikey).
 | [`blob.rs`](blob.rs) | Process images and binary data with base64 encoding |
 | [`mp4_describe.rs`](mp4_describe.rs) | Analyze and describe video content |
 
+### 📝 TOON Format (Work in Progress)
+
+| Example | Description |
+|---------|-------------|
+| [`toon_format.rs`](toon_format.rs) | Request TOON format output from Gemini using `.using_toon()` |
+| [`toon_bidirectional.rs`](toon_bidirectional.rs) | Send and receive data in TOON format with `.with_toon_message()` |
+
+**Note:** TOON format examples require the `toon_wip` feature flag:
+```bash
+GEMINI_API_KEY="your-api-key" cargo run --example toon_format --features toon_wip
+```
+
 ### 🎨 Image Generation
 
 | Example | Description |
@@ -173,6 +185,15 @@ Work with multimodal content:
 ```bash
 GEMINI_API_KEY="your-api-key" cargo run --example blob
 GEMINI_API_KEY="your-api-key" cargo run --example image_generation
+```
+
+### TOON Format
+
+Use TOON (Token-Oriented Object Notation) for structured data:
+
+```bash
+GEMINI_API_KEY="your-api-key" cargo run --example toon_format --features toon_wip
+GEMINI_API_KEY="your-api-key" cargo run --example toon_bidirectional --features toon_wip
 ```
 
 ## Notes
